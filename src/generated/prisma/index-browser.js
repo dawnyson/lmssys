@@ -176,6 +176,8 @@ exports.Prisma.CourseScalarFieldEnum = {
   description: 'description',
   thumbnailUrl: 'thumbnailUrl',
   createdBy: 'createdBy',
+  status: 'status',
+  category: 'category',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -197,6 +199,7 @@ exports.Prisma.LessonScalarFieldEnum = {
   duration: 'duration',
   order: 'order',
   quiz: 'quiz',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -259,6 +262,33 @@ exports.Role = exports.$Enums.Role = {
   Instructor: 'Instructor',
   Manager: 'Manager',
   Officer: 'Officer'
+};
+
+exports.MaterialStatus = exports.$Enums.MaterialStatus = {
+  Draft: 'Draft',
+  Private: 'Private',
+  Published: 'Published'
+};
+
+exports.CourseCategory = exports.$Enums.CourseCategory = {
+  Language: 'Language',
+  Technology: 'Technology',
+  Science: 'Science',
+  Business: 'Business',
+  Health: 'Health',
+  Art: 'Art',
+  Finance: 'Finance',
+  Compliance: 'Compliance',
+  SoftSkills: 'SoftSkills',
+  Leadership: 'Leadership',
+  HumanResources: 'HumanResources',
+  Operations: 'Operations',
+  CustomerService: 'CustomerService',
+  Sales: 'Sales',
+  Safety: 'Safety',
+  Productivity: 'Productivity',
+  Innovation: 'Innovation',
+  Other: 'Other'
 };
 
 exports.Prisma.ModelName = {

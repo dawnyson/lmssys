@@ -28,8 +28,8 @@ export default function Navbar() {
                     {status === "loading" && <LoaderCircle className="animate-spin text-gray-300" />}
                     {status === "authenticated" && <UserToggle session={session} />}
                     {status === "unauthenticated" &&
-                        <Button variant={"outline"} className="py-5" onClick={() => signIn("", { redirectTo: pathname })}>
-                            Login with Microsoft 365
+                        <Button variant={"outline"} className="py-5" onClick={() => signIn(undefined, { callbackUrl: pathname })}>
+                            Login
                         </Button>
                     }
                 </div>

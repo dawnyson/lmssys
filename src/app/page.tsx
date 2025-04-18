@@ -62,18 +62,7 @@ export default function HomePage() {
           <p className="text-lg text-muted-foreground mb-6">
             ระบบบริหารจัดการการเรียนรู้สำหรับองค์กรของคุณ
           </p>
-          {!isAuthenticated ? (
-            <div className="flex justify-center items-center space-x-4">
-              <Button variant={"outline"} className="py-5" onClick={() => handleProviderLogin("azure-ad")}>
-                <Image src={"/365.png"} alt="Logo" width={30} height={30} />
-                Login with Microsoft 365
-              </Button>
-              <Button variant={"outline"} className="py-5" onClick={() => handleProviderLogin("google")}>
-                <Image src={"/google.png"} alt="Logo" width={30} height={30} />
-                Login with Google
-              </Button>
-            </div>
-          ) : (
+          {isAuthenticated && (
             <div className="space-y-2">
               <p className="text-base">ยินดีต้อนรับ, {session.user?.name || "ผู้ใช้"}</p>
               <Link href="/dashboard">

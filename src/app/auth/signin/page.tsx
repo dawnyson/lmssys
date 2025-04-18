@@ -9,12 +9,13 @@ import { useSearchParams } from "next/navigation";
 export default function SignInPage() {
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get("callbackUrl") || "/";
+
     const handleProviderLogin = (provider: string) => {
         signIn(provider, { callbackUrl });
     };
 
     return (
-        <div className="h-full w-full flex flex-col items-center justify-center p-4">
+        <div className="flex flex-1 flex-col h-full items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
             <div className="space-y-6">
 
                 <Image src={"/logo.png"} className="mx-auto" alt="Logo" width={64} height={64} />

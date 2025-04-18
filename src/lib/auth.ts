@@ -55,20 +55,13 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
         async redirect({ url, baseUrl }) {
-            console.log("Redirect URL:", url, baseUrl);
+            // Allows relative callback URLs
+            if (url.startsWith("/")) return `${baseUrl}${url}`
 
-            // ป้องกันการรีไดเรกต์ไปยัง /api/auth/signin ซ้ำ
-            if (url === `${baseUrl}/api/auth/signin`) {
-                return baseUrl; // รีไดเรกต์กลับไปที่ baseUrl (เช่น หน้า Home)
-            }
+            // Allows callback URLs on the same origin
+            else if (new URL(url).origin === baseUrl) return url
 
-            // รีไดเรกต์ไปยัง URL ที่เริ่มต้นด้วย baseUrl
-            if (url.startsWith(baseUrl)) {
-                return url;
-            }
-
-            // กรณีอื่น ๆ รีไดเรกต์กลับไปที่ baseUrl
-            return baseUrl;
+            return baseUrl
         }
     }
 };

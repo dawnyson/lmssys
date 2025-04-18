@@ -3,12 +3,27 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    domains: [
-      'lh3.googleusercontent.com', // Google
-      'graph.facebook.com',        // Facebook
-      'avatars.githubusercontent.com' // GitHub
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "graph.facebook.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
-  }
+  },
 };
 
 export default nextConfig;

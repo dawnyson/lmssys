@@ -1,41 +1,31 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
-generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
-}
- 
-model User {
-  id            String          @id @default(cuid())
-  name          String?
-  email         String          @unique
-  emailVerified DateTime?
-  image         String?
-  role          Role            @default(Learner)
-  accounts      Account[]
-  sessions      Session[]
-  // Optional for WebAuthn support
-  Authenticator Authenticator[]
- 
-   // 🔗 Relations
-  createdCourses   Course[]
-  enrollments      Enrollment[]
-  courseProgresses CourseProgress[]
-  lessonProgresses LessonProgress[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model User {
+  id               String           @id @default(cuid())
+  name             String?
+  email            String           @unique
+  emailVerified    DateTime?
+  image            String?
+  role             Role             @default(Learner)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  accounts         Account[]
+  Authenticator    Authenticator[]
+  createdCourses   Course[]
+  courseProgresses CourseProgress[]
+  enrollments      Enrollment[]
+  lessonProgresses LessonProgress[]
+  sessions         Session[]
 }
- 
+
 model Account {
   userId            String
   type              String
@@ -49,34 +39,30 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([provider, providerAccountId])
 }
- 
+
 model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
- 
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
- 
+
   @@id([identifier, token])
 }
- 
-// Optional for WebAuthn support
+
 model Authenticator {
   credentialID         String  @unique
   userId               String
@@ -86,10 +72,99 @@ model Authenticator {
   credentialDeviceType String
   credentialBackedUp   Boolean
   transports           String?
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@id([userId, credentialID])
+}
+
+model Course {
+  id           String           @id @default(cuid())
+  title        String
+  description  String
+  thumbnailUrl String
+  createdBy    String
+  status       MaterialStatus   @default(Draft)
+  category     CourseCategory   @default(Other)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  creator      User             @relation(fields: [createdBy], references: [id])
+  progress     CourseProgress[]
+  enrollments  Enrollment[]
+  lessons      Lesson[]
+}
+
+model CourseProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+  course      Course    @relation(fields: [courseId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Lesson {
+  id           String              @id @default(cuid())
+  courseId     String
+  title        String
+  videoUrl     String
+  duration     Int
+  order        Int
+  quiz         Boolean
+  status       MaterialStatus      @default(Draft)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  course       Course              @relation(fields: [courseId], references: [id])
+  interactives LessonInteractive[]
+  progress     LessonProgress[]
+  quizzes      LessonQuiz[]
+}
+
+model LessonProgress {
+  id              String    @id @default(cuid())
+  userId          String
+  lessonId        String
+  watchedDuration Int
+  isCompleted     Boolean   @default(false)
+  completedAt     DateTime?
+  updatedAt       DateTime  @updatedAt
+  lesson          Lesson    @relation(fields: [lessonId], references: [id])
+  user            User      @relation(fields: [userId], references: [id])
+}
+
+model LessonInteractive {
+  id        String @id @default(cuid())
+  lessonId  String
+  timestamp Int
+  type      String
+  content   String
+  lesson    Lesson @relation(fields: [lessonId], references: [id])
+}
+
+model LessonQuiz {
+  id       String             @id @default(cuid())
+  lessonId String
+  question String
+  lesson   Lesson             @relation(fields: [lessonId], references: [id])
+  choices  LessonQuizChoice[]
+}
+
+model LessonQuizChoice {
+  id         String     @id @default(cuid())
+  quizId     String
+  choiceText String
+  isCorrect  Boolean
+  quiz       LessonQuiz @relation(fields: [quizId], references: [id])
+}
+
+model Enrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  enrolledAt DateTime @default(now())
+  course     Course   @relation(fields: [courseId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 enum Role {
@@ -100,97 +175,29 @@ enum Role {
   Officer
 }
 
-model Course {
-  id            String           @id @default(cuid())
-  title         String
-  description   String
-  thumbnailUrl  String
-  createdBy     String
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  creator       User             @relation(fields: [createdBy], references: [id])
-  lessons       Lesson[]
-  enrollments   Enrollment[]
-  progress      CourseProgress[]
+enum MaterialStatus {
+  Draft
+  Private
+  Published
 }
 
-model CourseProgress {
-  id           String   @id @default(cuid())
-  userId       String
-  courseId     String
-  isCompleted  Boolean  @default(false)
-  completedAt  DateTime?
-  updatedAt    DateTime @updatedAt
-
-  user         User     @relation(fields: [userId], references: [id])
-  course       Course   @relation(fields: [courseId], references: [id])
-}
-
-model Lesson {
-  id          String   @id @default(cuid())
-  courseId    String
-  title       String
-  videoUrl    String
-  duration    Int
-  order       Int
-  quiz        Boolean
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  course      Course   @relation(fields: [courseId], references: [id])
-  interactives LessonInteractive[]
-  quizzes     LessonQuiz[]
-  progress    LessonProgress[]
-}
-
-model LessonProgress {
-  id              String   @id @default(cuid())
-  userId          String
-  lessonId        String
-  watchedDuration Int
-  isCompleted     Boolean  @default(false)
-  completedAt     DateTime?
-  updatedAt       DateTime @updatedAt
-
-  user            User     @relation(fields: [userId], references: [id])
-  lesson          Lesson   @relation(fields: [lessonId], references: [id])
-}
-
-model LessonInteractive {
-  id         String   @id @default(cuid())
-  lessonId   String
-  timestamp  Int
-  type       String
-  content    String
-
-  lesson     Lesson   @relation(fields: [lessonId], references: [id])
-}
-
-model LessonQuiz {
-  id        String   @id @default(cuid())
-  lessonId  String
-  question  String
-
-  lesson    Lesson   @relation(fields: [lessonId], references: [id])
-  choices   LessonQuizChoice[]
-}
-
-model LessonQuizChoice {
-  id         String  @id @default(cuid())
-  quizId     String
-  choiceText String
-  isCorrect  Boolean
-
-  quiz       LessonQuiz @relation(fields: [quizId], references: [id])
-}
-
-model Enrollment {
-  id         String   @id @default(cuid())
-  userId     String
-  courseId   String
-  enrolledAt DateTime @default(now())
-
-  user       User     @relation(fields: [userId], references: [id])
-  course     Course   @relation(fields: [courseId], references: [id])
+enum CourseCategory {
+  Language
+  Technology
+  Science
+  Business
+  Health
+  Art
+  Finance
+  Compliance
+  SoftSkills
+  Leadership
+  HumanResources
+  Operations
+  CustomerService
+  Sales
+  Safety
+  Productivity
+  Innovation
+  Other
 }
