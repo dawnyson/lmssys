@@ -106,12 +106,13 @@ model Course {
   description   String
   thumbnailUrl  String
   createdBy     String
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
   creator       User             @relation(fields: [createdBy], references: [id])
   lessons       Lesson[]
   enrollments   Enrollment[]
   progress      CourseProgress[]
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
 }
 
 model CourseProgress {
